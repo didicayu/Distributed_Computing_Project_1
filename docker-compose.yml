@@ -1,0 +1,57 @@
+version: '3'
+services:
+  mosquitto:
+    image: eclipse-mosquitto
+    container_name: mosquitto
+    ports:
+      - "1883:1883"
+
+  temperature_sensor_albert:
+    build:
+      context: ./simulators/temperature_sensor
+    container_name: temperature_sensor_albert
+    environment:
+      - MQTT_BROKER=mosquitto
+      - USER_ID=1234
+
+  presence_sensor_albert:
+    build:
+      context: ./simulators/presence_sensor
+    container_name: presence_sensor_albert
+    environment:
+      - MQTT_BROKER=mosquitto
+      - USER_ID=1234
+
+  gateway_albert:
+    build:
+      context: ./gateways
+    container_name: gateway_albert
+    environment:
+      - MQTT_BROKER=mosquitto
+      - USER_ID=1234
+    depends_on:
+      - mosquitto
+      - temperature_sensor_albert
+      - presence_sensor_albert
+
+  cloud_ingestor:
+    build:
+      context: ./cloud_microservices/cloud_ingestor
+    container_name: cloud_ingestor
+    depends_on:
+      - mosquitto
+
+  kafka:
+    image: wurstmeister/kafka
+    ports:
+      - "9092:9092"
+    environment:
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+    depends_on:
+      - zookeeper
+
+  zookeeper:
+    image: wurstmeister/zookeeper
+    ports:
+      - "2181:2181"

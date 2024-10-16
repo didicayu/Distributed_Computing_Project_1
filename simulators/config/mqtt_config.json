@@ -1,0 +1,6 @@
+{
+    "broker_address": "localhost",
+    "broker_port": 1883,
+    "temperature_topic": "home/user1/temperature",
+    "presence_topic": "home/user1/presence"
+}
