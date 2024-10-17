@@ -34,12 +34,12 @@ services:
       - temperature_sensor_albert
       - presence_sensor_albert
 
-  cloud_ingestor:
-    build:
-      context: ./cloud_microservices/cloud_ingestor
-    container_name: cloud_ingestor
-    depends_on:
-      - mosquitto
+#  cloud_ingestor:
+#    build:
+#      context: ./cloud_microservices/cloud_ingestor
+#    container_name: cloud_ingestor
+#    depends_on:
+#      - mosquitto
 
   kafka:
     image: wurstmeister/kafka
