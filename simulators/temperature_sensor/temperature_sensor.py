@@ -3,6 +3,7 @@ from timeseries_get import TemperatureSimulator
 import time
 from datetime import datetime, timedelta
 import os
+import socket
 
 # MQTT Configuration
 broker = os.getenv('MQTT_BROKER', 'localhost')
@@ -15,10 +16,33 @@ client_id = f'temperature_sensor_{user_id}'
 
 # Initialize MQTT client
 client = mqtt_client.Client(client_id)
+
+connected = False
+max_attempts = 10
+attempts = 0
+retry_delay = 5
+
+while not connected and attempts < max_attempts:
+    try:
+        client = mqtt_client.Client(client_id)
+        connected = True
+
+    except (socket.error, ConnectionRefusedError):
+        attempts += 1
+        print(f"Connection attempt {attempts} failed. Retrying in {retry_delay} seconds...")
+        time.sleep(retry_delay)
+
+if not connected:
+    print("Could not connect to MQTT Broker after several attempts. Exiting.")
+    exit(1)
+
+
+
+client = mqtt_client.Client(client_id)
 client.connect(broker, port)
 
 # Initialize the temperature simulator with the current timestamp
-start_time = datetime.now()
+start_time = datetime.now().isoformat()
 ts = TemperatureSimulator(start_time)
 
 # Main loop for publishing temperature data
