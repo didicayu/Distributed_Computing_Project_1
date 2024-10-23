@@ -20,7 +20,6 @@ services:
       - USER_ID=1234
     depends_on:
       - mosquitto
-      - kafka
 
   presence_sensor_albert:
     build:
@@ -32,19 +31,18 @@ services:
       - USER_ID=1234
     depends_on:
       - mosquitto
-      - kafka
 
-#  gateway_albert:
-#    build:
-#      context: ./gateways
-#    container_name: gateway_albert
-#    environment:
-#      - MQTT_BROKER=mosquitto
-#      - USER_ID=1234
-#    depends_on:
-#      - mosquitto
-#      - temperature_sensor_albert
-#      - presence_sensor_albert
+  gateway_albert:
+    build:
+      context: ./gateways
+    container_name: gateway_albert
+    environment:
+      - MQTT_BROKER=mosquitto
+      - USER_ID=1234
+    depends_on:
+      - mosquitto
+      - temperature_sensor_albert
+      - presence_sensor_albert
 
 #  cloud_ingestor:
 #    build:

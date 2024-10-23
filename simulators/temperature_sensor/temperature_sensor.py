@@ -24,25 +24,21 @@ retry_delay = 5
 
 while not connected and attempts < max_attempts:
     try:
-        client = mqtt_client.Client(client_id)
+        client.connect(broker, port)
         connected = True
+        print("Connected to MQTT Broker!", flush=True)
 
     except (socket.error, ConnectionRefusedError):
         attempts += 1
-        print(f"Connection attempt {attempts} failed. Retrying in {retry_delay} seconds...")
+        print(f"Connection attempt {attempts} failed. Retrying in {retry_delay} seconds...", flush=True)
         time.sleep(retry_delay)
 
 if not connected:
-    print("Could not connect to MQTT Broker after several attempts. Exiting.")
+    print("Could not connect to MQTT Broker after several attempts. Exiting.", flush=True)
     exit(1)
 
-
-
-client = mqtt_client.Client(client_id)
-client.connect(broker, port)
-
 # Initialize the temperature simulator with the current timestamp
-start_time = datetime.now().isoformat()
+start_time = datetime.now()
 ts = TemperatureSimulator(start_time)
 
 # Main loop for publishing temperature data
@@ -52,12 +48,12 @@ while True:
     simulated_time += timedelta(minutes=1)
 
     # Get temperature reading from the simulator
-    temperature = ts.get_temperature(simulated_time, 1)  # Assuming heat pump is on
+    temperature = ts.get_temperature(simulated_time, 1)[1]  # Assuming heat pump is on
 
     # Publish the temperature reading
     message = f"{simulated_time}, {temperature:.2f}"
     client.publish(topic, message)
-    print(f"Published to {topic}: {message}")
+    print(f"Published to {topic}: {message}", flush=True)
 
     # Wait for 1 second of real time (simulating 1 minute in the simulation)
     time.sleep(1)
