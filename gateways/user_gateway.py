@@ -1,48 +1,49 @@
 from paho.mqtt import client as mqtt_client
-from kafka import KafkaProducer
 import os
 from datetime import datetime
 
-# MQTT Configuration
-broker = os.getenv('MQTT_BROKER', 'localhost')
-port = 1883
+# Local MQTT Configuration
+local_broker = os.getenv('MQTT_BROKER', 'localhost')
+local_port = 1883
 user_id = os.getenv('USER_ID', 'default_user')
 temperature_topic = f'home/{user_id}/temperature'
 presence_topic = f'home/{user_id}/presence'
 
-# Kafka Configuration
-kafka_broker = os.getenv('KAFKA_BROKER', 'localhost:9092')
-kafka_topic = os.getenv('KAFKA_TOPIC', 'sensor_data')
-
-# Initialize Kafka producer
-# producer = KafkaProducer(bootstrap_servers=[kafka_broker], value_serializer=lambda v: v.encode('utf-8'))
+# Cloud MQTT Configuration
+cloud_broker = os.getenv('CLOUD_MQTT_BROKER', 'cloud_mosquitto')
+cloud_port = 1883
+cloud_topic = 'cloud_ingestor'
 
 
-# MQTT callbacks
-
-def on_connect(client, userdata, flags, rc):
+# Initialize MQTT Client to Connect to Local Broker
+def on_connect_local(client, userdata, flags, rc):
     if rc == 0:
-        print("Connected to MQTT Broker!", flush=True)
+        print("Connected to Local MQTT Broker!", flush=True)
         client.subscribe(temperature_topic)
         client.subscribe(presence_topic)
     else:
-        print("Failed to connect, return code %d\n", rc, flush=True)
+        print(f"Failed to connect to local broker, return code {rc}\n", flush=True)
 
 
-# def on_message(client, userdata, msg):
-#     message = msg.payload.decode()
-#     topic = msg.topic
-#     timestamp = datetime.now()
-#     kafka_message = f"{timestamp}, {topic}, {message}"
-#     producer.send(kafka_topic, kafka_message)
-#     print(f"Forwarded to Kafka: {kafka_message}", flush=True)
+def on_message_local(client, userdata, msg):
+    # Initialize MQTT Client to Connect to Cloud Broker
+    cloud_client = mqtt_client.Client(f'gateway_cloud_{user_id}')
+    cloud_client.connect(cloud_broker, cloud_port)
+
+    message = msg.payload.decode()
+    topic = msg.topic
+    timestamp = datetime.now()
+    forward_message = f"{timestamp}, {topic}, {message}"
+
+    cloud_client.publish(cloud_topic, forward_message)
+    print(f"Forwarded to Cloud MQTT Broker {cloud_topic}: {forward_message}", flush=True)
 
 
-# Initialize MQTT client
-client = mqtt_client.Client(f'gateway_{user_id}')
-client.on_connect = on_connect
-# client.on_message = on_message
-client.connect(broker, port)
+# Connect to the Local MQTT Broker
+local_client = mqtt_client.Client(f'gateway_{user_id}')
+local_client.on_connect = on_connect_local
+local_client.on_message = on_message_local
+local_client.connect(local_broker, local_port)
 
 # Start the MQTT client loop
-client.loop_forever()
+local_client.loop_forever()

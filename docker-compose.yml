@@ -1,14 +1,51 @@
 version: '3'
 services:
-  mosquitto:
+
+  # ------ 🦟 Mosquitto Brokers 🦟 ------
+
+  mosquitto_albert:
     image: eclipse-mosquitto
-    container_name: mosquitto
+    container_name: mosquitto_albert
     ports:
       - "1883:1883"
     volumes:
       - ./mosquitto_config/mosquitto.conf:/mosquitto/config/mosquitto.conf
 
+  mosquitto_tommy:
+    image: eclipse-mosquitto
+    container_name: mosquitto_tommy
+    ports:
+      - "1884:1883"
+    volumes:
+      - ./mosquitto_config/mosquitto.conf:/mosquitto/config/mosquitto.conf
 
+  mosquitto_dakota:
+    image: eclipse-mosquitto
+    container_name: mosquitto_dakota
+    ports:
+      - "1885:1883"
+    volumes:
+      - ./mosquitto_config/mosquitto.conf:/mosquitto/config/mosquitto.conf
+
+  mosquitto_tifany:
+    image: eclipse-mosquitto
+    container_name: mosquitto_tifany
+    ports:
+      - "1886:1883"
+    volumes:
+      - ./mosquitto_config/mosquitto.conf:/mosquitto/config/mosquitto.conf
+
+    # ------- Cloud Mosquitto Broker -------
+
+  cloud_mosquitto:
+    image: eclipse-mosquitto
+    container_name: cloud_mosquitto
+    ports:
+      - "1887:1883"
+    volumes:
+      - ./mosquitto_config/mosquitto.conf:/mosquitto/config/mosquitto.conf
+
+  # ------- User: ALBERT Id: 1234 -------
 
   temperature_sensor_albert:
     build:
@@ -16,10 +53,10 @@ services:
       dockerfile: ./simulators/temperature_sensor/Dockerfile
     container_name: temperature_sensor_albert
     environment:
-      - MQTT_BROKER=mosquitto
+      - MQTT_BROKER=mosquitto_albert
       - USER_ID=1234
     depends_on:
-      - mosquitto
+      - mosquitto_albert
 
   presence_sensor_albert:
     build:
@@ -27,29 +64,170 @@ services:
       dockerfile: ./simulators/presence_sensor/Dockerfile
     container_name: presence_sensor_albert
     environment:
-      - MQTT_BROKER=mosquitto
+      - MQTT_BROKER=mosquitto_albert
       - USER_ID=1234
     depends_on:
-      - mosquitto
+      - mosquitto_albert
 
   gateway_albert:
     build:
       context: ./gateways
     container_name: gateway_albert
     environment:
-      - MQTT_BROKER=mosquitto
+      - MQTT_BROKER=mosquitto_albert
+      - CLOUD_MQTT_BROKER=cloud_mosquitto
+      - KAFKA_BROKER=kafka:9092
+      - KAFKA_TOPIC=sensor_data
       - USER_ID=1234
     depends_on:
-      - mosquitto
-      - temperature_sensor_albert
-      - presence_sensor_albert
+      mosquitto_albert:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+      temperature_sensor_albert:
+        condition: service_started
+      presence_sensor_albert:
+        condition: service_started
 
-#  cloud_ingestor:
-#    build:
-#      context: ./cloud_microservices/cloud_ingestor
-#    container_name: cloud_ingestor
-#    depends_on:
-#      - mosquitto
+  # ------- User: TOMMY Id: 1235 -------
+
+  temperature_sensor_tommy:
+    build:
+      context: ./
+      dockerfile: ./simulators/temperature_sensor/Dockerfile
+    container_name: temperature_sensor_tommy
+    environment:
+      - MQTT_BROKER=mosquitto_tommy
+      - USER_ID=1235
+    depends_on:
+      - mosquitto_tommy
+
+  presence_sensor_tommy:
+    build:
+      context: ./
+      dockerfile: ./simulators/presence_sensor/Dockerfile
+    container_name: presence_sensor_tommy
+    environment:
+      - MQTT_BROKER=mosquitto_tommy
+      - USER_ID=1235
+    depends_on:
+      - mosquitto_tommy
+
+  gateway_tommy:
+    build:
+      context: ./gateways
+    container_name: gateway_tommy
+    environment:
+      - MQTT_BROKER=mosquitto_tommy
+      - CLOUD_MQTT_BROKER=cloud_mosquitto
+      - KAFKA_BROKER=kafka:9092
+      - KAFKA_TOPIC=sensor_data
+      - USER_ID=1235
+    depends_on:
+      mosquitto_tommy:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+      temperature_sensor_tommy:
+        condition: service_started
+      presence_sensor_tommy:
+        condition: service_started
+
+  # ------- User: DAKOTA Id: 1236 -------
+
+  temperature_sensor_dakota:
+    build:
+      context: ./
+      dockerfile: ./simulators/temperature_sensor/Dockerfile
+    container_name: temperature_sensor_dakota
+    environment:
+      - MQTT_BROKER=mosquitto_dakota
+      - USER_ID=1236
+    depends_on:
+      - mosquitto_dakota
+
+  presence_sensor_dakota:
+    build:
+      context: ./
+      dockerfile: ./simulators/presence_sensor/Dockerfile
+    container_name: presence_sensor_dakota
+    environment:
+      - MQTT_BROKER=mosquitto_dakota
+      - USER_ID=1236
+    depends_on:
+      - mosquitto_dakota
+
+  gateway_dakota:
+    build:
+      context: ./gateways
+    container_name: gateway_dakota
+    environment:
+      - MQTT_BROKER=mosquitto_dakota
+      - CLOUD_MQTT_BROKER=cloud_mosquitto
+      - KAFKA_BROKER=kafka:9092
+      - KAFKA_TOPIC=sensor_data
+      - USER_ID=1236
+    depends_on:
+      mosquitto_dakota:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+      temperature_sensor_dakota:
+        condition: service_started
+      presence_sensor_dakota:
+        condition: service_started
+
+  # ------- User: TIFANY Id: 1237 -------
+
+  temperature_sensor_tifany:
+    build:
+      context: ./
+      dockerfile: ./simulators/temperature_sensor/Dockerfile
+    container_name: temperature_sensor_tifany
+    environment:
+      - MQTT_BROKER=mosquitto_tifany
+      - USER_ID=1237
+    depends_on:
+      - mosquitto_tifany
+
+  presence_sensor_tifany:
+    build:
+      context: ./
+      dockerfile: ./simulators/presence_sensor/Dockerfile
+    container_name: presence_sensor_tifany
+    environment:
+      - MQTT_BROKER=mosquitto_tifany
+      - USER_ID=1237
+    depends_on:
+      - mosquitto_tifany
+
+  gateway_tifany:
+    build:
+      context: ./gateways
+    container_name: gateway_tifany
+    environment:
+      - MQTT_BROKER=mosquitto_tifany
+      - CLOUD_MQTT_BROKER=cloud_mosquitto
+      - KAFKA_BROKER=kafka:9092
+      - KAFKA_TOPIC=sensor_data
+      - USER_ID=1237
+    depends_on:
+      mosquitto_tifany:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+      temperature_sensor_tifany:
+        condition: service_started
+      presence_sensor_tifany:
+        condition: service_started
+
+  # ------- Cloud Ingestor (Optional, commented) -------
+  #  cloud_ingestor:
+  #    build:
+  #      context: ./cloud_microservices/cloud_ingestor
+  #    container_name: cloud_ingestor
+  #    depends_on:
+  #      - mosquitto
 
   kafka:
     image: wurstmeister/kafka:2.13-2.7.0
@@ -61,7 +239,11 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
     depends_on:
       - zookeeper
-
+    healthcheck:
+      test: kafka-topics.sh -list --bootstrap-server kafka:9092
+      interval: 1s
+      timeout: 10s
+      retries: 5
 
   zookeeper:
     image: wurstmeister/zookeeper
