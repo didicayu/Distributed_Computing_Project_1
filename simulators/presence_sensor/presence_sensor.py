@@ -12,7 +12,7 @@ def debug_log(msg):
 broker = os.getenv('MQTT_BROKER', 'localhost')
 port = 1883
 user_id = os.getenv('USER_ID', 'default_user')
-topic = f'home/{user_id}/presence'
+topic = f'home/presence'
 
 # MQTT client ID
 client_id = f'presence_sensor_{user_id}'

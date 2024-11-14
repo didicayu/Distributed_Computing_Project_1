@@ -9,7 +9,7 @@ import socket
 broker = os.getenv('MQTT_BROKER', 'localhost')
 port = 1883
 user_id = os.getenv('USER_ID', 'default_user')
-topic = f'home/{user_id}/temperature'
+topic = f'home/temperature'
 
 # MQTT client ID
 client_id = f'temperature_sensor_{user_id}'

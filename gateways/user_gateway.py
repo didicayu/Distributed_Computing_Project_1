@@ -1,3 +1,5 @@
+import json
+
 from paho.mqtt import client as mqtt_client
 import os
 from datetime import datetime
@@ -6,8 +8,8 @@ from datetime import datetime
 local_broker = os.getenv('MQTT_BROKER', 'localhost')
 local_port = 1883
 user_id = os.getenv('USER_ID', 'default_user')
-temperature_topic = f'home/{user_id}/temperature'
-presence_topic = f'home/{user_id}/presence'
+temperature_topic = f'home/temperature'
+presence_topic = f'home/presence'
 
 # Cloud MQTT Configuration
 cloud_broker = os.getenv('CLOUD_MQTT_BROKER', 'cloud_mosquitto')
@@ -33,10 +35,16 @@ def on_message_local(client, userdata, msg):
     message = msg.payload.decode()
     topic = msg.topic
     timestamp = datetime.now()
-    forward_message = f"{timestamp}, {topic}, {message}"
 
-    cloud_client.publish(cloud_topic, forward_message)
-    print(f"Forwarded to Cloud MQTT Broker {cloud_topic}: {forward_message}", flush=True)
+    forward_message = {
+        'timestamp': str(timestamp),
+        'message': message
+    }
+
+    message_json = json.dumps(forward_message)
+
+    cloud_client.publish(f'{user_id}/{topic}', message_json)
+    print(f"Forwarded to Cloud MQTT Broker {topic}: {message_json}", flush=True)
 
 
 # Connect to the Local MQTT Broker
