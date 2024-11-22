@@ -298,7 +298,7 @@ services:
       - DOCKER_INFLUXDB_INIT_USERNAME=project_1
       - DOCKER_INFLUXDB_INIT_PASSWORD=supersecretpassword
       - DOCKER_INFLUXDB_INIT_ORG=UDL
-      - DOCKER_INFLUXDB_INIT_BUCKET=raw_data
+      - DOCKER_INFLUXDB_INIT_BUCKET=data
       - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=supersecrettoken
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:8086/health || exit 1" ]
@@ -338,8 +338,7 @@ services:
     container_name: clean_service
     environment:
       - KAFKA_BROKER=kafka:9092
-      - KAFKA_TOPIC=sensor_data
-      - CLEAN_KAFKA_TOPIC=sensor_data_clean
+      - KAFKA_TOPICS=sensor_data_clean,sensor_data
     depends_on:
       kafka:
         condition: service_healthy
@@ -358,6 +357,9 @@ services:
       - CLEAN_KAFKA_TOPIC=sensor_data_clean
       - INFLUXDB_HOST=influxdb
       - INFLUXDB_DATABASE=sensor_data
+      - INFLUXDB_ORG=UDL
+      - INFLUXDB_TOKEN=supersecrettoken
+      - INFLUXDB_BUCKET=data
     depends_on:
       kafka:
         condition: service_healthy
@@ -368,19 +370,20 @@ services:
 
   # ------- Actuate Service -------
 
-#  actuate_service:
-#    build:
-#      context: ./cloud_microservices/actuate_service
-#    container_name: actuate_service
-#    environment:
-#      - KAFKA_BROKER=kafka:9092
-#      - KAFKA_TOPIC=sensor_data_actuate
-#    depends_on:
-#      kafka:
-#        condition: service_healthy
-#    networks:
-#      - cloud_network
-#      - server_network
+  actuate_service:
+    build:
+      context: ./cloud_microservices/actuate_service
+    container_name: actuate_service
+    environment:
+      - KAFKA_BROKER=kafka:9092
+      - CLEAN_KAFKA_TOPIC=sensor_data_clean
+      - CLOUD_MQTT_BROKER=cloud_mosquitto
+    depends_on:
+      kafka:
+        condition: service_healthy
+    networks:
+      - cloud_network
+      - server_network
 
   kafka:
     image: wurstmeister/kafka:2.13-2.7.0

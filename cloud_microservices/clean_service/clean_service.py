@@ -25,11 +25,17 @@ producer = KafkaProducer(
 print("Clean Service is running and listening to topic:", input_topic)
 
 def clean_data(raw_data):
-    # Simple data cleaning logic - you can modify this based on requirements
+    # Simple data cleaning logic
     cleaned_data = {}
-    cleaned_data['timestamp'] = raw_data.get('timestamp')
     cleaned_data['topic'] = raw_data.get('topic')
-    cleaned_data['message'] = raw_data.get('message').strip()  # Example cleaning
+    cleaned_data['message'] = raw_data.get('message')
+
+    msg_json = json.loads(raw_data.get('message'))
+    message_value = msg_json.get('message')
+
+    if float(message_value) >= 100.0:
+        return None
+
     return cleaned_data
 
 # Consume and process messages
@@ -39,8 +45,10 @@ for message in consumer:
 
     # Clean the data
     cleaned_data = clean_data(raw_data)
-    print(f"Cleaned data: {cleaned_data}", flush=True)
-
-    # Send cleaned data to Kafka
-    producer.send(output_topic, value=cleaned_data)
-    print(f"Sent cleaned data to Kafka topic {output_topic}: {cleaned_data}", flush=True)
+    if cleaned_data:
+        print(f"Cleaned data: {cleaned_data}", flush=True)
+        # Send cleaned data to Kafka
+        producer.send(output_topic, value=cleaned_data)
+        print(f"Sent cleaned data to Kafka topic {output_topic}: {cleaned_data}", flush=True)
+    else:
+        print(f"Data cleaned and discarded: {raw_data}", flush=True)
