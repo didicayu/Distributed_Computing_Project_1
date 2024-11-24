@@ -370,20 +370,37 @@ services:
 
   # ------- Actuate Service -------
 
-  actuate_service:
+#  actuate_service:
+#    build:
+#      context: ./cloud_microservices/actuate_service
+#    container_name: actuate_service
+#    environment:
+#      - KAFKA_BROKER=kafka:9092
+#      - CLEAN_KAFKA_TOPIC=sensor_data_clean
+#      - CLOUD_MQTT_BROKER=cloud_mosquitto
+#    depends_on:
+#      kafka:
+#        condition: service_healthy
+#    networks:
+#      - cloud_network
+#      - server_network
+
+  actuate_service_with_sleep:
     build:
-      context: ./cloud_microservices/actuate_service
-    container_name: actuate_service
+      context: ./cloud_microservices/actuate_service_with_sleep
+#    container_name: actuate_service_with_sleep
     environment:
       - KAFKA_BROKER=kafka:9092
       - CLEAN_KAFKA_TOPIC=sensor_data_clean
       - CLOUD_MQTT_BROKER=cloud_mosquitto
     depends_on:
-      kafka:
-        condition: service_healthy
+        kafka:
+            condition: service_healthy
     networks:
-      - cloud_network
-      - server_network
+        - cloud_network
+        - server_network
+    deploy:
+      replicas: 6
 
   kafka:
     image: wurstmeister/kafka:2.13-2.7.0

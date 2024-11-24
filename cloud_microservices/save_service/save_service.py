@@ -53,7 +53,7 @@ def save_to_influxdb(data, data_type):
         # Create a Point object for InfluxDB
         point = (
             Point("sensor_data")
-            .tag("type_of_data", data_type)
+            .tag("type_of_data", data_type) # filtered / unfiltered
             .tag("user_id", int(data.get("topic").split('/')[0]))  # Extract user_id from topic
             .tag("sensor_type", data.get("topic").split('/')[2])  # Extract sensor_type from topic
             .field("message", float(message))

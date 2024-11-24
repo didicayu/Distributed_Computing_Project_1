@@ -66,3 +66,5 @@ for message in consumer:
     print(f"Received data to evaluate: {data}", flush=True)
     temperature_actuation(data)
 
+    sleep(0.5) # Add a sleep of 0,5 seconds in the Actuate sensor every time we process a message in and explain what happens with the kafka queue?
+
