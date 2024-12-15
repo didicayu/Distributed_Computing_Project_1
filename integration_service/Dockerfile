@@ -14,3 +14,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Run the integration script
 CMD ["python", "integration_rest_api_script.py"]
+# CMD ["python", "integration_script.py"]
