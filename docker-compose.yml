@@ -19,6 +19,9 @@ networks:
   server_network:
     driver: bridge
 
+  shared_network:
+    external: True
+
 
 services:
 
@@ -342,6 +345,8 @@ services:
     depends_on:
       kafka:
         condition: service_healthy
+      save_service:
+        condition: service_started
     networks:
       - server_network
 
@@ -381,6 +386,8 @@ services:
 #    depends_on:
 #      kafka:
 #        condition: service_healthy
+#      save_service:
+#        condition: service_started
 #    networks:
 #      - cloud_network
 #      - server_network
@@ -396,6 +403,8 @@ services:
     depends_on:
         kafka:
             condition: service_healthy
+        save_service:
+            condition: service_started
     networks:
         - cloud_network
         - server_network
@@ -426,3 +435,22 @@ services:
       - "2181:2181"
     networks:
       - server_network
+
+    # ------- City Council Service -------
+  integration_service:
+    build:
+      context: ./integration_service  # Path to the directory containing the script
+    container_name: integration_service
+    depends_on:
+      kafka:
+        condition: service_healthy
+    environment:
+      KAFKA_BROKER: kafka:9092
+      SOAP_WSDL_URL: http://city_council_service:8093/?wsdl
+      SOAP_USERNAME: user1024
+      SOAP_PASSWORD: DKDbRQ8EzY4Q
+      TOPIC: sensor_data_clean
+    networks:
+      - server_network
+      - cloud_network
+      - shared_network

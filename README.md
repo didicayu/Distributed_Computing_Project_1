@@ -50,6 +50,8 @@ actuate_service_with_sleep:
 
 ### 2. Adjust the Number of Partitions in `create_multiple_topic`  
 
+It is worth noting that for normal execution (i.e **without** the Actuate Delay Exercise), the Kafka topic is created with **1 partition**. Else we want as much partitions as the number of replicas.
+
 To configure the Kafka topic with **1 partition** instead of the default (e.g., 6):  
 
 1. Open the script that contains the `create_multiple_topic` function.  
