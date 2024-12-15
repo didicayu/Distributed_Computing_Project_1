@@ -5,9 +5,9 @@ import os
 import time
 
 # API Configuration
-API_BASE_URL = "http://api_service:8090/v1"
-USERNAME = "userAdmin"
-PASSWORD = "12345678"
+API_BASE_URL = os.getenv("API_BASE_URL")
+USERNAME = os.getenv("API_USERNAME")
+PASSWORD = os.getenv("API_PASSWORD")
 
 # Kafka Configuration
 KAFKA_BROKER = os.getenv("KAFKA_BROKER", "localhost:9092")

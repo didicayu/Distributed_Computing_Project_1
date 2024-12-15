@@ -450,6 +450,9 @@ services:
       SOAP_USERNAME: user1024
       SOAP_PASSWORD: DKDbRQ8EzY4Q
       TOPIC: sensor_data_clean
+      API_BASE_URL: "http://api_service:8090/v1"
+      API_USERNAME: userAdmin
+      API_PASSWORD: 12345678
     networks:
       - server_network
       - cloud_network
